@@ -42,6 +42,7 @@ model Thread {
   authorId String
   comments Comment[]
   votes Vote[]
+  cloudinaryId String @map("cloudinary_id") @default("")
   createdAt DateTime  @default(now())
   updatedAt DateTime @updatedAt
 }
