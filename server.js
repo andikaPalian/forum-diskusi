@@ -4,6 +4,7 @@ import 'dotenv/config';
 import connectCloudinary from './src/config/cloudinary.js';
 import multer from 'multer';
 import userRouter from './src/routes/user.routes.js';
+import threadRouter from './src/routes/thread.routes.js';
 
 const app = express();
 const port = process.env.PORT;
@@ -13,6 +14,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api/user", userRouter);
+app.use("/api/thread", threadRouter);
 
 // Handle multer errors
 app.use((err, req, res, next) => {
