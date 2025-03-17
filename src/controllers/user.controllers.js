@@ -277,7 +277,7 @@ const updateProfile = async (req, res) => {
         });
     } catch (error) {
         console.error("Error during profile update:", error);
-        res.status(500).json({
+        return res.status(500).json({
             message: "Internal server error",
             error: error.message || "An unexpected error occurred"
         });
@@ -318,7 +318,7 @@ const getUserProfile = async (req, res) => {
         );
     } catch (error) {
         console.error("Error fetching user profile:", error);
-        res.status(500).json({
+        return res.status(500).json({
             message: "Internal server error",
             error: error.message || "An unexpected error occurred"
         });
