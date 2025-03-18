@@ -89,11 +89,18 @@ const getThread = async (req, res) => {
 
         const threads = await prisma.thread.findMany({
             include: {
-                author: true
+                author: true,
+                comments: {
+                    include: {
+                        author: true
+                    }
+                }
             },
             skip: skip,
             take: limitNum
         });
+
+        const totalThreads = await prisma.thread.count();
 
         res.status(200).json({
             message: "Threads fetched successfully",
@@ -104,11 +111,19 @@ const getThread = async (req, res) => {
                 author: {
                     avatar: thread.author.avatar,
                     name: thread.author.name
-                }
+                },
+                comments: thread.comments.map(comment => ({
+                    id: comment.id,
+                    content: comment.content,
+                    author: {
+                        avatar: comment.author.avatar,
+                        name: comment.author.name
+                    }
+                }))
             })),
             page: pageNum,
             limit: limitNum,
-            totalPage: Math.ceil(threads.length / limitNum)
+            totalPage: Math.ceil(totalThreads / limitNum)
         });
     } catch (error) {
         console.error("Error during get threads:", error);
@@ -128,7 +143,12 @@ const getThreadById = async (req, res) => {
                 id: threadId
             },
             include: {
-                author: true
+                author: true,
+                comments: {
+                    include: {
+                        author: true
+                    }
+                }
             }
         });
         if (!thread) {
@@ -146,7 +166,15 @@ const getThreadById = async (req, res) => {
                 author: {
                     avatar: thread.author.avatar,
                     name: thread.author.name
-                }
+                },
+                comments: thread.comments.map(comment => ({
+                    id: comment.id,
+                    content: comment.content,
+                    author: {
+                        avatar: comment.author.avatar,
+                        name: comment.author.name
+                    }
+                }))
             }
         });
     } catch (error) {
@@ -171,7 +199,12 @@ const getThreadByUserId = async (req, res) => {
                 authorId: userId
             },
             include: {
-                author: true
+                author: true,
+                comments: {
+                    include: {
+                        author: true
+                    }
+                }
             },
             skip: skip,
             take: limitNum
@@ -182,6 +215,12 @@ const getThreadByUserId = async (req, res) => {
             });
         }
 
+        const totalThreads = await prisma.thread.count({
+            where: {
+                authorId: userId
+            }
+        });
+
         res.status(200).json({
             message: "Threads fetched successfully",
             threads: threads.map(thread => ({
@@ -191,11 +230,19 @@ const getThreadByUserId = async (req, res) => {
                 author: {
                     avatar: thread.author.avatar,
                     name: thread.author.name
-                }
+                },
+                comments: thread.comments.map(comment => ({
+                    id: comment.id,
+                    content: comment.content,
+                    author: {
+                        avatar: comment.author.avatar,
+                        name: comment.author.name
+                    }
+                }))
             })),
             page: pageNum,
             limit: limitNum,
-            totalPage: Math.ceil(threads.length / limitNum)
+            totalPage: Math.ceil(totalThreads / limitNum)
         });
     } catch (error) {
         console.error("Error during get thread by user Id:", error);
