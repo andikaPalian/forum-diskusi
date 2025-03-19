@@ -6,6 +6,7 @@ import multer from 'multer';
 import userRouter from './src/routes/user.routes.js';
 import threadRouter from './src/routes/thread.routes.js';
 import commentRouter from './src/routes/comment.routes.js';
+import moderatorRouter from './src/routes/moderator.routes.js';
 
 const app = express();
 const port = process.env.PORT;
@@ -17,6 +18,7 @@ app.use(express.json());
 app.use("/api/user", userRouter);
 app.use("/api/thread", threadRouter);
 app.use("/api/comment", commentRouter);
+app.use("/api/moderator", moderatorRouter);
 
 // Handle multer errors
 app.use((err, req, res, next) => {
