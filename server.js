@@ -5,6 +5,7 @@ import connectCloudinary from './src/config/cloudinary.js';
 import multer from 'multer';
 import userRouter from './src/routes/user.routes.js';
 import threadRouter from './src/routes/thread.routes.js';
+import commentRouter from './src/routes/comment.routes.js';
 
 const app = express();
 const port = process.env.PORT;
@@ -15,6 +16,7 @@ app.use(express.json());
 
 app.use("/api/user", userRouter);
 app.use("/api/thread", threadRouter);
+app.use("/api/comment", commentRouter);
 
 // Handle multer errors
 app.use((err, req, res, next) => {
