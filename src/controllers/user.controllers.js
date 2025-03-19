@@ -103,6 +103,12 @@ const userLogin = async (req, res) => {
             });
         }
 
+        if (user.isBanned === true) {
+            return res.status(403).json({
+                message: "Your account has been banned, please contact the administrator or moderator"
+            });
+        }
+
         const isMatch = await bcrypt.compare(password, user.password);
         if (isMatch) {
             const token = jwt.sign({
