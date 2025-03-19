@@ -139,6 +139,12 @@ const uploadAvatar = async (req, res) => {
     try {
         const {userId} = req.params;
 
+        if (userId !== req.user.userId) {
+            return res.status(403).json({
+                message: "You are not authorized to perform this action"
+            });
+        }
+
         if (!validator.isUUID(userId)) {
             return res.status(400).json({
                 message: "Invalid user ID"
@@ -197,6 +203,12 @@ const updateProfile = async (req, res) => {
     try {
         const {userId} = req.params;
         const {name, email} = req.body;
+
+        if (userId !== req.user.userId) {
+            return res.status(403).json({
+                message: "You are not authorized to perform this action"
+            });
+        }
 
         if (!validator.isUUID(userId)) {
             return res.status(400).json({
