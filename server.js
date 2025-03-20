@@ -7,6 +7,7 @@ import userRouter from './src/routes/user.routes.js';
 import threadRouter from './src/routes/thread.routes.js';
 import commentRouter from './src/routes/comment.routes.js';
 import moderatorRouter from './src/routes/moderator.routes.js';
+import voteRouter from './src/routes/vote.routes.js';
 
 const app = express();
 const port = process.env.PORT;
@@ -19,6 +20,7 @@ app.use("/api/user", userRouter);
 app.use("/api/thread", threadRouter);
 app.use("/api/comment", commentRouter);
 app.use("/api/moderator", moderatorRouter);
+app.use("/api/vote", voteRouter);
 
 // Handle multer errors
 app.use((err, req, res, next) => {
