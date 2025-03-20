@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import validator from "validator";
 import {v2 as cloudinary} from 'cloudinary';
 import fs from 'fs/promises';
+import { title } from "process";
 
 const prisma = new PrismaClient();
 
@@ -94,7 +95,8 @@ const getThread = async (req, res) => {
                     include: {
                         author: true
                     }
-                }
+                },
+                vote: true
             },
             skip: skip,
             take: limitNum
@@ -102,9 +104,15 @@ const getThread = async (req, res) => {
 
         const totalThreads = await prisma.thread.count();
 
-        res.status(200).json({
-            message: "Threads fetched successfully",
-            threads: threads.map(thread => ({
+        const formattedThreads = threads.map(thread => {
+            const {upVote, downVote, totalVotes} = thread.vote.reduce((acc, vote) => {
+                if (vote.voteType === 1) acc.upVote += 1;
+                if (vote.voteType === -1) acc.downVote += 1;
+                acc.totalVotes += vote.voteType;
+                return acc;
+            }, {upVote: 0, downVote: 0, totalVotes: 0});
+
+            return {
                 id: thread.id,
                 title: thread.title,
                 content: thread.content,
@@ -112,6 +120,9 @@ const getThread = async (req, res) => {
                     avatar: thread.author.avatar,
                     name: thread.author.name
                 },
+                upVote,
+                downVote,
+                totalVotes,
                 comments: thread.comments.map(comment => ({
                     id: comment.id,
                     content: comment.content,
@@ -119,11 +130,42 @@ const getThread = async (req, res) => {
                         avatar: comment.author.avatar,
                         name: comment.author.name
                     }
-                }))
-            })),
+                })),
+                // page: pageNum,
+                // limit: limitNum,
+                // totalPage: Math.ceil(totalThreads / limitNum)
+            }
+        })
+
+        res.status(200).json({
+            message: "Threads fetched successfully",
+            threads: formattedThreads,
             page: pageNum,
             limit: limitNum,
-            totalPage: Math.ceil(totalThreads / limitNum)
+            totalPages: Math.ceil(totalThreads / limitNum)
+            // threads: threads.map(thread => ({
+            //     id: thread.id,
+            //     title: thread.title,
+            //     content: thread.content,
+            //     author: {
+            //         avatar: thread.author.avatar,
+            //         name: thread.author.name
+            //     },
+            //     upVote: thread.vote.filter(vote => vote.voteType === 1).length,
+            //     downVote: thread.vote.filter(vote => vote.voteType === -1).length,
+            //     totalVotes: thread.vote.reduce((acc, vote) => acc + vote.voteType, 0),
+            //     comments: thread.comments.map(comment => ({
+            //         id: comment.id,
+            //         content: comment.content,
+            //         author: {
+            //             avatar: comment.author.avatar,
+            //             name: comment.author.name
+            //         }
+            //     }))
+            // })),
+            // page: pageNum,
+            // limit: limitNum,
+            // totalPage: Math.ceil(totalThreads / limitNum)
         });
     } catch (error) {
         console.error("Error during get threads:", error);
@@ -148,7 +190,8 @@ const getThreadById = async (req, res) => {
                     include: {
                         author: true
                     }
-                }
+                },
+                vote: true
             }
         });
         if (!thread) {
@@ -167,6 +210,9 @@ const getThreadById = async (req, res) => {
                     avatar: thread.author.avatar,
                     name: thread.author.name
                 },
+                upVote: thread.vote.filter(vote => vote.voteType === 1).length,
+                downVote: thread.vote.filter(vote => vote.voteType === -1).length,
+                totalVotes: thread.vote.reduce((acc, vote) => acc + vote.voteType, 0),
                 comments: thread.comments.map(comment => ({
                     id: comment.id,
                     content: comment.content,
@@ -204,7 +250,8 @@ const getThreadByUserId = async (req, res) => {
                     include: {
                         author: true
                     }
-                }
+                },
+                vote: true
             },
             skip: skip,
             take: limitNum
@@ -221,9 +268,15 @@ const getThreadByUserId = async (req, res) => {
             }
         });
 
-        res.status(200).json({
-            message: "Threads fetched successfully",
-            threads: threads.map(thread => ({
+        const formattedThreads = threads.map(thread => {
+            const {upVote, downVote, totalVotes} = thread.vote.reduce((acc, vote) => {
+                if (vote.voteType === 1) acc.upVote += 1
+                if (vote.voteType === -1) acc.downVote += 1;
+                acc.totalVotes += vote.voteType;
+                return acc;
+            }, {upVote: 0, downVote: 0, totalVotes: 0});
+
+            return {
                 id: thread.id,
                 title: thread.title,
                 content: thread.content,
@@ -231,6 +284,9 @@ const getThreadByUserId = async (req, res) => {
                     avatar: thread.author.avatar,
                     name: thread.author.name
                 },
+                upVote,
+                downVote,
+                totalVotes,
                 comments: thread.comments.map(comment => ({
                     id: comment.id,
                     content: comment.content,
@@ -239,10 +295,35 @@ const getThreadByUserId = async (req, res) => {
                         name: comment.author.name
                     }
                 }))
-            })),
+            }
+        })
+
+        res.status(200).json({
+            message: "Threads fetched successfully",
+            threads: formattedThreads,
             page: pageNum,
             limit: limitNum,
             totalPage: Math.ceil(totalThreads / limitNum)
+            // threads: threads.map(thread => ({
+            //     id: thread.id,
+            //     title: thread.title,
+            //     content: thread.content,
+            //     author: {
+            //         avatar: thread.author.avatar,
+            //         name: thread.author.name
+            //     },
+            //     comments: thread.comments.map(comment => ({
+            //         id: comment.id,
+            //         content: comment.content,
+            //         author: {
+            //             avatar: comment.author.avatar,
+            //             name: comment.author.name
+            //         }
+            //     }))
+            // })),
+            // page: pageNum,
+            // limit: limitNum,
+            // totalPage: Math.ceil(totalThreads / limitNum)
         });
     } catch (error) {
         console.error("Error during get thread by user Id:", error);
