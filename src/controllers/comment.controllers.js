@@ -93,8 +93,11 @@ const getCommentByThreadId = async (req, res) => {
                 threadId: threadId
             },
             include: {
-                author: true
-            }
+                author: true,
+                vote: true
+            },
+            skip: skip,
+            take: limitNum
         });
 
         if (comments.length === 0) {
@@ -108,21 +111,47 @@ const getCommentByThreadId = async (req, res) => {
                 threadId: threadId
             }
         });
+        
+        const formattedComments = comments.map(comment => {
+            const {upVote, downVote, totalVotes} = comment.vote.reduce((acc, vote) => {
+                if (vote.voteType === 1) acc.upVote += 1;
+                if (vote.voteType === -1) acc.downVote += 1;
+                acc.totalVotes += vote.voteType;
+                return acc;
+            }, {upVote: 0, downVote: 0, totalVotes: 0});
 
-        res.status(200).json({
-            message: "Comments retrieved successfully",
-            comments: comments.map(comment => ({
+            return {
                 id: comment.id,
                 content: comment.content,
                 author: {
                     avatar: comment.author.avatar,
                     name: comment.author.name
-                }
-            })),
-            totalComments: totalComments,
+                },
+                upVote,
+                downVote,
+                totalVotes
+            }
+        })
+
+        res.status(200).json({
+            message: "Comments retrieved successfully",
+            comments: formattedComments,
+            totalComments,
+            page: pageNum,
+            limit: limitNum,
             totalPages: Math.ceil(totalComments / limitNum),
-            cuurentPage: pageNum,
-            limit: limitNum
+            // comments: comments.map(comment => ({
+            //     id: comment.id,
+            //     content: comment.content,
+            //     author: {
+            //         avatar: comment.author.avatar,
+            //         name: comment.author.name
+            //     }
+            // })),
+            // totalComments: totalComments,
+            // totalPages: Math.ceil(totalComments / limitNum),
+            // cuurentPage: pageNum,
+            // limit: limitNum
         });
     } catch (error) {
         console.error("Error during getting comments by thread ID:", error);
