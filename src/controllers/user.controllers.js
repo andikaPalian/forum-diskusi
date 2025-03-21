@@ -163,10 +163,7 @@ const uploadAvatar = async (req, res) => {
 
         const user = await prisma.user.findUnique({
             where: {
-                email_role: {
-                    email: req.user.email,
-                    role: "USER"
-                }
+                id: userId
             }
         });
         if (!user) {
@@ -230,10 +227,7 @@ const updateProfile = async (req, res) => {
 
         const user = await prisma.user.findUnique({
             where: {
-                email_role: {
-                    email: req.user.email,
-                    role: "USER"
-                }
+                id: userId
             }
         });
         if (!user) {
@@ -324,10 +318,7 @@ const getUserProfile = async (req, res) => {
 
         const user = await prisma.user.findUnique({
             where: {
-                email_role: {
-                    email: req.user.email,
-                    role: "USER"
-                }
+                id: userId
             }
         });
         if (!user) {
