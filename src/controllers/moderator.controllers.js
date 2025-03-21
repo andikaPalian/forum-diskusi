@@ -10,7 +10,7 @@ const prisma = new PrismaClient();
 const registerModerator = async (req, res) => {
     try {
         const {name, email, password} = req.body;
-        if (!name?.trimn() || !email?.trim() || !password?.trim()) {
+        if (!name?.trim() || !email?.trim() || !password?.trim()) {
             return res.status(400).json({
                 message: "Please fill all the fields"
             });
