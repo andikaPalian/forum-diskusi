@@ -8,7 +8,7 @@ const commentRouter = express.Router();
 commentRouter.get("/comment/:threadId", getCommentByThreadId);
 
 // Private routes
-commentRouter.post("/comment/:threadId/:userId", auth, hashRole(["USER"]), addComment);
+commentRouter.post("/comment/:threadId/:userId/:parentId?", auth, hashRole(["USER"]), addComment);
 commentRouter.patch("/comment/:commentId/:userId", auth, hashRole(["USER"]), editCommet);
 commentRouter.delete("/comment/:commentId/:userId", auth, hashRole(["USER"]), deleteComment);
 

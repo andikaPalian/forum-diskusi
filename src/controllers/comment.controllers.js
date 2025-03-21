@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 const addComment = async (req, res) => {
     try {
-        const {threadId, userId} = req.params;
+        const {threadId, userId, parentId} = req.params;
         const {content} = req.body;
 
         if (userId !== req.user.userId) {
@@ -47,7 +47,8 @@ const addComment = async (req, res) => {
             data: {
                 content,
                 threadId: threadId,
-                authorId: userId
+                authorId: userId,
+                parentId: parentId || null
             },
             include: {
                 author: true
@@ -59,6 +60,7 @@ const addComment = async (req, res) => {
             comment: {
                 id: comment.id,
                 content: comment.content,
+                parentId: comment.parentId,
                 author: {
                     avatar: comment.author.avatar,
                     name: comment.author.name
@@ -94,7 +96,12 @@ const getCommentByThreadId = async (req, res) => {
             },
             include: {
                 author: true,
-                vote: true
+                vote: true,
+                replies: {
+                    include: {
+                        author: true
+                    }
+                }
             },
             skip: skip,
             take: limitNum
@@ -129,7 +136,15 @@ const getCommentByThreadId = async (req, res) => {
                 },
                 upVote,
                 downVote,
-                totalVotes
+                totalVotes,
+                replies: comment.replies.map(reply => ({
+                    id: reply.id,
+                    content: reply.content,
+                    author: {
+                        avatar: reply.author.avatar,
+                        name: reply.author.name
+                    }
+                }))
             }
         })
 
