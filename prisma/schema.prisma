@@ -64,6 +64,12 @@ model Comment {
   // totalVote Int
   createdAt DateTime  @default(now())
   updatedAt DateTime @updatedAt
+
+  // Self-referencing relationship
+  // Jika NULL, berarti komentar utama
+  parentId String? @map("parent_id")
+  parent Comment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies Comment[] @relation("CommentReplies")
 }
 
 // model Vote {
