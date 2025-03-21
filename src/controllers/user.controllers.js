@@ -346,4 +346,104 @@ const getUserProfile = async (req, res) => {
     }
 }
 
-export {userRegister, userLogin, uploadAvatar, updateProfile, getUserProfile};
+const bandUser = async (req, res) => {
+    try {
+        const {userId} = req.params;
+        const requesterId = req.user.userId;
+        const requesterRole = req.user.role;
+
+        if (requesterRole !== "MODERATOR") {
+            return res.status(403).json({
+                message: "You are not authorized to perform this action. Only moderators can band users."
+            });
+        }
+
+        const user = await prisma.user.findUnique({
+            where: {
+                id: userId
+            }
+        });
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found"
+            });
+        }
+
+        if (requesterId === userId) {
+            return res.status(400).json({
+                message: "You cannot ban yourself"
+            });
+        }
+
+        await prisma.user.update({
+            where: {
+                id: userId
+            },
+            data: {
+                isBanned: true
+            }
+        });
+
+        res.status(200).json({
+            message: `User ${user.name} has been banned`
+        });
+    } catch (error) {
+        console.error("Error during band user:", error);
+        return res.status(500).json({
+            message: "Internal server error",
+            error: error.message || "An unexpected error occurred"
+        });
+    }
+}
+
+const unbanUser = async (req, res) => {
+    try {
+        const {userId} = req.params;
+        const requesterId = req.user.userId;
+        const requesterRole = req.user.role;
+
+        if (requesterRole !== "MODERATOR") {
+            return res.status(403).json({
+                message: "You are not authorized to perform this action. Only moderators can unband users."
+            });
+        }
+
+        const user = await prisma.user.findUnique({
+            where: {
+                id: userId
+            }
+        });
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found"
+            });
+        }
+
+        if (user.isBanned === false) {
+            return res.status(400).json({
+                message: "User is already unbanned"
+            });
+        }
+
+        await prisma.user.update({
+            where: {
+                id: userId
+            },
+            data: {
+                isBanned: false
+            }
+        });
+
+        res.status(200).json({
+            message: `User ${user.name} has been unbanned`
+        });
+    } catch (error) {
+        console.error("Error during unband user:", error);
+        return res.status(500).json({
+            message: "Internal server error",
+            error: error.message || "An unexpected error occurred"
+        });
+    }
+}
+
+export {userRegister, userLogin, uploadAvatar, updateProfile, getUserProfile, bandUser, unbanUser};
