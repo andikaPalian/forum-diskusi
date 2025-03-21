@@ -37,8 +37,10 @@ const userRegister = async (req, res) => {
 
         const userExisting = await prisma.user.findUnique({
             where: {
-                email: email,
-                role: "USER"
+                email_role: {
+                    email: email,
+                    role: "USER"
+                }
             }
         });
         if (userExisting) {
@@ -93,8 +95,10 @@ const userLogin = async (req, res) => {
 
         const user = await prisma.user.findUnique({
             where: {
-                email: email,
-                role: "USER"
+                email_role: {
+                    email: email,
+                    role: "USER"
+                }
             }
         });
         if (!user) {
@@ -159,8 +163,10 @@ const uploadAvatar = async (req, res) => {
 
         const user = await prisma.user.findUnique({
             where: {
-                id: userId,
-                role: "USER"
+                email_role: {
+                    email: req.user.email,
+                    role: "USER"
+                }
             }
         });
         if (!user) {
@@ -224,8 +230,10 @@ const updateProfile = async (req, res) => {
 
         const user = await prisma.user.findUnique({
             where: {
-                id: userId,
-                role: "USER"
+                email_role: {
+                    email: req.user.email,
+                    role: "USER"
+                }
             }
         });
         if (!user) {
@@ -278,6 +286,8 @@ const updateProfile = async (req, res) => {
             updateData.avatar = result.secure_url;
             updateData.cloudinaryId = result.public_id;
         } else {
+            // await fs.unlink(req.file.path);
+
             updateData.avatar = user.avatar;
             updateData.cloudinaryId = user.cloudinaryId;
         }
@@ -314,8 +324,10 @@ const getUserProfile = async (req, res) => {
 
         const user = await prisma.user.findUnique({
             where: {
-                id: userId,
-                role: "USER"
+                email_role: {
+                    email: req.user.email,
+                    role: "USER"
+                }
             }
         });
         if (!user) {
