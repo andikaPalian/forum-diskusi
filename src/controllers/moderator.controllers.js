@@ -9,7 +9,21 @@ const prisma = new PrismaClient();
 
 const registerModerator = async (req, res) => {
     try {
+        const {userId} = req.params;
         const {name, email, password} = req.body;
+
+        if (userId !== req.user.userId) {
+            return res.status(403).json({
+                message: "You are not authorized to register a moderator"
+            });
+        }
+
+        if (req.user.role !== "MODERATOR") {
+            return res.status(403).json({
+                message: "You are not authorized to register a moderator"
+            });
+        }
+
         if (!name?.trim() || !email?.trim() || !password?.trim()) {
             return res.status(400).json({
                 message: "Please fill all the fields"
@@ -18,7 +32,7 @@ const registerModerator = async (req, res) => {
 
         if (typeof name !== 'string' || !validator.isLength(name, {min: 3, max: 30})) {
             return res.status(400).json({
-                message: "Name must be a string beetwen 3 and 30 characters"
+                message: "Name must be a string between 3 and 30 characters"
             });
         }
 
@@ -37,8 +51,10 @@ const registerModerator = async (req, res) => {
 
         const existingModerator = await prisma.user.findUnique({
             where: {
-                email: email,
-                role: "MODERATOR"
+                email_role: {
+                    email: email,
+                    role: "MODERATOR"
+                }
             }
         });
         if (existingModerator) {
@@ -62,7 +78,7 @@ const registerModerator = async (req, res) => {
             message: "Moderator created successfully",
             moderator: {
                 id: moderator.id,
-                avaatar: moderator.avatar,
+                avatar: moderator.avatar,
                 name: moderator.name,
                 email: moderator.email,
                 role: moderator.role
@@ -94,8 +110,10 @@ const loginModerator = async (req, res) => {
 
         const moderator = await prisma.user.findUnique({
             where: {
-                email: email,
-                role: "MODERATOR"
+                email_role: {
+                    email: email,
+                    role: "MODERATOR"
+                }
             }
         });
         if (!moderator) {
@@ -154,8 +172,10 @@ const uploadAvatar = async (req, res) => {
 
         const moderator = await prisma.user.findUnique({
             where: {
-                id: userId,
-                role: "MODERATOR"
+                email_role: {
+                    email: req.user.email,
+                    role: "MODERATOR"
+                }
             }
         });
         if (!moderator) {
@@ -219,8 +239,10 @@ const updateProfile = async (req, res) => {
 
         const moderator = await prisma.user.findUnique({
             where: {
-                id: userId,
-                role: "MODERATOR"
+                email_role: {
+                    email: req.user.email,
+                    role: "MODERATOR"
+                }
             }
         });
         if (!moderator) {
@@ -302,8 +324,10 @@ const getModeratorProfile = async (req, res) => {
 
         const moderator = await prisma.user.findUnique({
             where: {
-                id: userId,
-                role: "MODERATOR"
+                email_role: {
+                    email: req.user.email,
+                    role: "MODERATOR"
+                }
             }
         });
         if (!moderator) {
