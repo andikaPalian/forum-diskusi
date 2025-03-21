@@ -34,6 +34,8 @@ model User {
   cloudinaryId String @map("cloudinary_id") @default("")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([email, role])
 }
 
 model Thread {
